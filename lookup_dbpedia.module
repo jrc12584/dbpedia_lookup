@@ -1,0 +1,318 @@
+<?php
+
+/**
+ * Implementation of CCK's hook_field_info ().
+ *
+ * Returns basic information about this CCK field.
+ */
+function lookup_dbpedia_field_info()
+{
+  return array(
+    'lookup_dbpedia' => array(
+      'label' => t('Lookup for DBPedia - Labels and URIs'),
+      'description' => t('DBPedia lookup service')
+    )
+  );
+}
+
+/**
+ * Implementation of hook_install().
+ *
+ * Lets CCK take care of this.
+ */
+function lookup_dbpedia_install()
+{
+  content_notify('install', 'lookup_dbpedia');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ *
+ * Lets CCK take care of this.
+ */
+function lookup_dbpedia_uninstall()
+{
+  content_notify('uninstall', 'lookup_dbpedia');
+}
+
+/**
+ * Implementation of hook_enable().
+ *
+ * Lets CCK take care of this.
+ */
+function lookup_dbpedia_enable()
+{
+  content_notify('enable', 'lookup_dbpedia');
+}
+
+/**
+ * Implementation of hook_disable().
+ *
+ * Lets CCK take care of this.
+ */
+function lookup_dbpedia_disable()
+{
+  content_notify('disable', 'lookup_dbpedia');
+}
+
+/**
+ * Implements hook_perm().
+ * 
+ * Valid permissions for this module
+ *
+ * @return array
+ *   An array of valid permissions for the asn_toolkit module.
+ */
+ 
+function lookup_dbpedia_perm()
+{
+  return array(
+    'administer lookup_dbpedia',
+    'access lookup_dbpedia'
+  );
+}
+
+/**
+ * Implementation of CCK hook_field_settings().
+ */
+ 
+function lookup_dbpedia_field_settings($op, $field)
+{
+  switch ($op) {
+    case 'database columns':
+      $columns['prefLabel'] = array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'sortable' => TRUE
+      );
+      $columns['uri']       = array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'sortable' => TRUE
+      );
+      return $columns;
+  }
+}
+
+/**
+ * Implementation of CCK hook_field().
+ */
+ 
+function lookup_dbpedia_field($op, &$node, $field, &$items, $teaser, $page)
+{
+  switch ($op) {
+    case 'validate':
+      $allowed_values = content_allowed_values($field);
+      if (is_array($items)) {
+        foreach ($items as $delta => $item) {
+        }
+      }
+      break;
+    
+    case 'sanitize':
+      foreach ($items as $delta => $item) {
+        foreach ($item as $col => $dat) {
+          $items[$delta]['safe_' . $col] = filter_xss($item[$col]);
+        }
+      }
+      break;
+    
+    case 'presave':
+      foreach ($items as $delta => $item) {
+        $data                       = explode("[", rtrim($item['prefLabel'], "]"));
+        $items[$delta]['prefLabel'] = trim($data[0]);
+        $items[$delta]['uri']       = trim($data[1]);
+      }
+      break;
+      
+  }
+}
+
+/**
+ * Implementation of hook_content_is_empty().
+ */
+ 
+function lookup_dbpedia_content_is_empty($item, $field)
+{
+  if (empty($item['prefLabel'])) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * Implementation of hook_widget_info().
+ */
+ 
+function lookup_dbpedia_widget_info()
+{
+  return array(
+    'lookup_dbpedia_entry' => array(
+      'label' => t('DBPedia Lookup Field'),
+      'field types' => array(
+        'lookup_dbpedia'
+      ),
+      'multiple values' => CONTENT_HANDLE_CORE,
+      'callbacks' => array(
+        'default value' => CONTENT_CALLBACK_CUSTOM
+      )
+    )
+  );
+}
+
+/**
+ * Implementation of Form API's hook_elements().
+ *
+ * Returns a skeleton Form API array that defines callbacks
+ * for the widget form.
+ */
+ 
+function lookup_dbpedia_elements()
+{
+  $elements = array(
+    'lookup_dbpedia_entry' => array(
+      '#input' => TRUE,
+      '#process' => array(
+        'lookup_dbpedia_lookup_dbpedia_entry_process'
+      )
+    )
+  );
+  
+  return $elements;
+}
+
+/**
+ * Process callback for widget
+ *
+ * Returns a Forms API array that defines the widget's editing form.
+ */
+ 
+function lookup_dbpedia_lookup_dbpedia_entry_process($element, $edit, $form_state, $form)
+{
+  $defaults = $element['#value'];
+  if (isset($defaults['prefLabel'])) {
+    $default = $defaults['prefLabel'] . ' [' . $defaults['uri'] . ']';
+  } else {
+    $default = $element['#value'];
+  }
+  
+  $field = content_fields($element['#field_name'], $element['#type_name']);
+  
+  $element['prefLabel'] = array(
+    '#title' => t('Term'),
+    '#type' => 'textfield',
+    '#autocomplete_path' => 'lookup_dbpedia/autocomplete',
+    '#weight' => 2,
+    '#default_value' => $default,
+    '#required' => $element['#required'],
+    '#delta' => $element['#delta']
+  );
+  
+  $element['uri'] = array(
+    '#title' => t('Identifier'),
+    '#type' => 'textfield',
+    '#weight' => 3,
+    '#default_value' => $default,
+    '#required' => $element['#required'],
+    '#delta' => $element['#delta'],
+    '#access' => false
+  );
+  
+  return $element;
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+ 
+function lookup_dbpedia_theme()
+{
+  return array(
+    'lookup_dbpedia_entry' => array(
+      'arguments' => array(
+        'element' => NULL
+      )
+    ),
+    'lookup_dbpedia_formatter_default' => array(
+      'arguments' => array(
+        'element' => NULL
+      )
+    )
+  );
+}
+
+/**
+ * FAPI theme for an individual text elements.
+ */
+ 
+function theme_lookup_dbpedia_entry($element)
+{
+  return $element['#children'];
+}
+
+/**
+ * Implementation of hook_widget().
+ */
+ 
+function lookup_dbpedia_widget(&$form, &$form_state, $field, $items, $delta = 0)
+{
+  $element = array(
+    '#type' => $field['widget']['type'],
+    '#default_value' => isset($items[$delta]) ? $items[$delta] : ''
+  );
+  return $element;
+}
+
+/**
+ * Implementation of CCK's hook_field_formatter_info().
+ *
+ * Returns information about available field formatters.
+ */
+ 
+function lookup_dbpedia_field_formatter_info()
+{
+  return array(
+    'default' => array(
+      'label' => t('lookup_dbpedia display'),
+      'field types' => array(
+        'lookup_dbpedia'
+      )
+    )
+  );
+}
+
+/**
+ * Theme function for default formatter.
+ */
+ 
+function theme_lookup_dbpedia_formatter_default($element = NULL)
+{
+  if (empty($element['#item'])) {
+    return '';
+  }
+  $e = $element['#item'];
+  $ret = '<span class="dbpedia_lookup">';
+  $ret .= '<a href="' . $e['safe_uri'] . '">';
+  $ret .= $e['safe_prefLabel'] . '</a><br/>';
+  $ret .= '</span>';
+  
+  return $ret;
+}
+
+/**
+ * Implements hook_menu().
+ */
+ 
+function lookup_dbpedia_menu()
+{
+  $items['lookup_dbpedia/autocomplete'] = array(
+    'page callback' => 'lookup_dbpedia_autocomplete',
+    'access callback' => TRUE,
+    'file' => 'lookup_dbpedia_autocomplete.inc',
+    'type' => MENU_CALLBACK
+  );
+  
+  return $items;
+}

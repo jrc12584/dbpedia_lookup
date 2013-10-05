@@ -1,0 +1,7 @@
+; $Id:$
+name = DBPedia Lookup
+description = A CCK compound field representing (label and URI) that looks up DBPedia URI's.
+dependencies[] = content
+package = CCK
+core = 6.x
+version = 6.x-1.0
