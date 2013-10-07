@@ -1,6 +1,6 @@
 ; $Id:$
 name = DBPedia Lookup
-description = A CCK compound field representing (label and URI) that looks up DBPedia URI's.
+description = A CCK auto-complete field widget that looks up DBPedia URI's and stores the URI and preferred label.
 dependencies[] = content
 package = CCK
 core = 6.x
