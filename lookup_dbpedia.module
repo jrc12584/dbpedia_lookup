@@ -19,7 +19,7 @@ function lookup_dbpedia_field_info() {
 /**
  * Implementation of hook_install().
  *
- * Lets CCK take care of this.
+ * Let CCK take care of this.
  */
 function lookup_dbpedia_install() {
   content_notify('install', 'lookup_dbpedia');
@@ -28,7 +28,7 @@ function lookup_dbpedia_install() {
 /**
  * Implementation of hook_uninstall().
  *
- * Lets CCK take care of this.
+ * Let CCK take care of this.
  */
 function lookup_dbpedia_uninstall() {
   content_notify('uninstall', 'lookup_dbpedia');
@@ -37,7 +37,7 @@ function lookup_dbpedia_uninstall() {
 /**
  * Implementation of hook_enable().
  *
- * Lets CCK take care of this.
+ * Let CCK take care of this.
  */
 function lookup_dbpedia_enable() {
   content_notify('enable', 'lookup_dbpedia');
@@ -46,7 +46,7 @@ function lookup_dbpedia_enable() {
 /**
  * Implementation of hook_disable().
  *
- * Lets CCK take care of this.
+ * Let CCK take care of this.
  */
 function lookup_dbpedia_disable() {
   content_notify('disable', 'lookup_dbpedia');
