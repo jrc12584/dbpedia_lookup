@@ -162,11 +162,11 @@ function lookup_dbpedia_lookup_dbpedia_entry_process($element, $edit, $form_stat
   if (isset($defaults['prefLabel'])) {
 		$default = $defaults['prefLabel'] . ' ['. $defaults['uri'] .']';
   }else{
-		$default = $element['#value'];
+	  $default = '';
 	}
 	
   $field = content_fields($element['#field_name'], $element['#type_name']);
-
+	
   $element['prefLabel'] = array(
     '#title' => t('Term'),
     '#type' => 'textfield',
