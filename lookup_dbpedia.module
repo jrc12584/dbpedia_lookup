@@ -99,9 +99,9 @@ function lookup_dbpedia_field($op, &$node, $field, &$items, $teaser, $page) {
 		 
 		 case 'presave':
 		    foreach ($items as $delta => $item){
-				  $data = explode("[" , rtrim($item['prefLabel'], "]"));
-				  $items[$delta]['prefLabel'] = trim($data[0]);
-					$items[$delta]['uri'] = trim($data[1]);
+						$data = explode("[" , rtrim($item['prefLabel'], "]"));
+						$items[$delta]['prefLabel'] = trim($data[0]);
+						$items[$delta]['uri'] = trim($data[1]);
 				}
 			break;
 		 
@@ -114,8 +114,9 @@ function lookup_dbpedia_field($op, &$node, $field, &$items, $teaser, $page) {
 function lookup_dbpedia_content_is_empty($item, $field) {
   if (empty($item['prefLabel'])) {
     return TRUE;
-  }
-  return FALSE;
+  }else{
+	  return FALSE;
+	}
 }
 
 /**
@@ -157,7 +158,6 @@ function lookup_dbpedia_elements() {
  * Returns a Forms API array that defines the widget's editing form.
  */
 function lookup_dbpedia_lookup_dbpedia_entry_process($element, $edit, $form_state, $form) {
-
 	$defaults = $element['#value'];
   if (isset($defaults['prefLabel'])) {
 		$default = $defaults['prefLabel'] . ' ['. $defaults['uri'] .']';
@@ -240,7 +240,7 @@ function lookup_dbpedia_field_formatter_info() {
  * Theme function for default formatter.
  */
 function theme_lookup_dbpedia_formatter_default($element = NULL) {
-  if(empty($element['#item'])) {
+	if(empty($element['#item']['prefLabel'])) {
     return '';
   }
   $stuff = $element['#item'];
